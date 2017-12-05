@@ -14,6 +14,7 @@ opts=GetoptLong.new(
   ["--receiverPort",  GetoptLong::OPTIONAL_ARGUMENT],
   ["--append-file",   GetoptLong::OPTIONAL_ARGUMENT],
   ["--tcp",           GetoptLong::OPTIONAL_ARGUMENT],
+  ["--event_time",    GetoptLong::OPTIONAL_ARGUMENT],
   *cef_event.attrs.keys.collect {|o| ["--#{o}", GetoptLong::OPTIONAL_ARGUMENT]}
 )
 
@@ -21,7 +22,7 @@ def print_usage
         puts <<END_USAGE
 Usage: cef_sender --sourceAddress="192.168.1.1" [--eventAttribute="something"]
 
-  non-schema arguments: 
+  non-schema arguments:
      --help gets you here
      --schema will dump all of the callable event attribute names
      --receiver= syslog receiver hostname/ip
@@ -71,8 +72,7 @@ cef_sender=CEF::UDPSender.new
 cef_sender.receiver=@receiver_host
 cef_sender.receiverPort=@receiver_port
 
-
-msg=cef_event.format_cef
+msg=cef_event.to_s
 
 
 if @verbose>0
