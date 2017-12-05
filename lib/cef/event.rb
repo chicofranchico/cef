@@ -1,6 +1,8 @@
+require 'time'
+
 module CEF
   class Event
-    attr_accessor :syslog_pri, :event_time, :my_hostname
+    attr_accessor :syslog_pri, :my_hostname
     # set up accessors for all of the CEF event attributes. ruby meta magic.
     CEF::ATTRIBUTES.each do |k,v|
       self.instance_eval do
@@ -11,7 +13,11 @@ module CEF
     def attrs
       CEF::ATTRIBUTES
     end
-  
+
+    def event_time=(event_time)
+      @event_time = Time.parse(event_time)
+    end
+
     # so we can CEF::Event.new(:foo=>"bar")
     def initialize( *params )
       @event_time         = Time.new
@@ -31,11 +37,12 @@ module CEF
       yield self if block_given?
       self
     end
-  
-    # returns a cef formatted string
+
+    # returns a cef formatted string of the kind:
+    # CEF:Version|Device Vendor|Device Product|Device Version|Signature ID (deviceEventClassId)|Name|Severity|Extension
     def to_s
-      log_time=event_time.strftime(CEF::LOG_TIME_FORMAT)
-      
+      log_time=@event_time.strftime(CEF::LOG_TIME_FORMAT)
+
       sprintf(
         CEF::LOG_FORMAT,
         syslog_pri.to_s,
@@ -53,30 +60,6 @@ module CEF
     def get_additional(k,v)
       @additional[k]
     end
-
-    #private
-      # make a guess as to how the time was set. parse strings and convert
-      # them to epoch milliseconds, or leave it alone if it looks like a number
-      # bigger than epoch milliseconds when i wrote this.
-      # def time_convert(val)
-      #
-      #   converted=case val
-      #     when String
-      #       if val.match(%r{\A[0-9]+\Z})
-      #         converted=val.to_i
-      #       else
-      #         res=Chronic.parse(val)
-      #         converted=Time.at(res).to_i * 1000
-      #       end
-      #     when Integer,Bignum
-      #       if val < 1232589621000 #Wed Jan 21 20:00:21 -0600 2009
-      #         val * 1000
-      #       else
-      #         val
-      #       end
-      #     end
-      #
-      # end
 
       # escape only pipes and backslashes in the prefix. you bet your sweet
       # ass there's a lot of backslashes in the substitution. you can thank
