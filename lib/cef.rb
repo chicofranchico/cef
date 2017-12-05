@@ -5,6 +5,5 @@ require 'cef/constants'
 require 'cef/event'
 require 'cef/sender'
 
-
 module CEF
 end

@@ -3,23 +3,23 @@ require 'rubygems'
 require 'cef'
 require 'getoptlong'
 
-@verbose=0
-@file=nil
-cef_event=CEF::Event.new
-opts=GetoptLong.new(
-  ["--verbose",       GetoptLong::OPTIONAL_ARGUMENT],
-  ["--help",          GetoptLong::OPTIONAL_ARGUMENT],
-  ["--schema",        GetoptLong::OPTIONAL_ARGUMENT],
-  ["--receiver",      GetoptLong::OPTIONAL_ARGUMENT],
-  ["--receiverPort",  GetoptLong::OPTIONAL_ARGUMENT],
-  ["--append-file",   GetoptLong::OPTIONAL_ARGUMENT],
-  ["--tcp",           GetoptLong::OPTIONAL_ARGUMENT],
-  ["--event_time",    GetoptLong::OPTIONAL_ARGUMENT],
-  *cef_event.attrs.keys.collect {|o| ["--#{o}", GetoptLong::OPTIONAL_ARGUMENT]}
+@verbose = 0
+@file = nil
+cef_event = CEF::Event.new
+opts = GetoptLong.new(
+  ['--verbose',       GetoptLong::OPTIONAL_ARGUMENT],
+  ['--help',          GetoptLong::OPTIONAL_ARGUMENT],
+  ['--schema',        GetoptLong::OPTIONAL_ARGUMENT],
+  ['--receiver',      GetoptLong::OPTIONAL_ARGUMENT],
+  ['--receiverPort',  GetoptLong::OPTIONAL_ARGUMENT],
+  ['--append-file',   GetoptLong::OPTIONAL_ARGUMENT],
+  ['--tcp',           GetoptLong::OPTIONAL_ARGUMENT],
+  ['--event_time',    GetoptLong::OPTIONAL_ARGUMENT],
+  *cef_event.attrs.keys.collect { |o| ["--#{o}", GetoptLong::OPTIONAL_ARGUMENT] }
 )
 
 def print_usage
-        puts <<END_USAGE
+  puts <<END_USAGE
 Usage: cef_sender --sourceAddress="192.168.1.1" [--eventAttribute="something"]
 
   non-schema arguments:
@@ -35,51 +35,46 @@ only the cef fields defined in the cef reader flex connector are supported.
 datatyping is not enforced here.
 
 END_USAGE
-
 end
 
 def print_schema(event)
-  event.attrs.keys.collect {|k| k.to_s}.sort.each {|a| puts a}
+  event.attrs.keys.collect(&:to_s).sort.each { |a| puts a }
 end
 
-
-opts.each do |opt,arg|
+opts.each do |opt, arg|
   # TODO: set up cases for startTime, receiptTime, endTime to parse
   #       text and convert to unix time * 1000
   case opt
-    when "--verbose"
-      @verbose+=1
-    when "--schema"
-      print_schema(cef_event)
-      exit(0)
-    when "--receiverPort"
-      @receiver_port=arg
-    when "--receiver"
-      @receiver_host=arg
-    when "--help"
-      print_usage
-      exit(0)
-    when "--append-file"
-      @file=File.open(arg,"w+")
-    else
-      fieldname = opt.gsub(/-/,'')
-      value=arg
-      cef_event.send("%s=" % fieldname, value)
+  when '--verbose'
+    @verbose += 1
+  when '--schema'
+    print_schema(cef_event)
+    exit(0)
+  when '--receiverPort'
+    @receiver_port = arg
+  when '--receiver'
+    @receiver_host = arg
+  when '--help'
+    print_usage
+    exit(0)
+  when '--append-file'
+    @file = File.open(arg, 'w+')
+  else
+    fieldname = opt.delete('-')
+    value = arg
+    cef_event.send(format('%s=', fieldname), value)
   end
 end
 
-cef_sender=CEF::UDPSender.new
-cef_sender.receiver=@receiver_host
-cef_sender.receiverPort=@receiver_port
+cef_sender = CEF::UDPSender.new
+cef_sender.receiver = @receiver_host
+cef_sender.receiverPort = @receiver_port
 
-msg=cef_event.to_s
+msg = cef_event.to_s
 
-
-if @verbose>0
-  puts msg
-end
-if !(@file.nil?) && File.exists?(@file)
-  @file.write "%s\n" % msg.gsub(/^<\d+>/,'')
+puts msg if @verbose > 0
+if !@file.nil? && File.exist?(@file)
+  @file.write format("%s\n", msg.gsub(/^<\d+>/, ''))
 else
   cef_sender.emit(cef_event)
 end
