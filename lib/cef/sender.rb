@@ -15,14 +15,14 @@ module CEF
   class UDPSender < Sender
     def initialize(receiver = '127.0.0.1', port = 514)
       @receiver = receiver
-      @port = port
+      @receiverPort = port
     end
 
-    # fire the message off
+    # send the message
     def emit(event)
       socksetup if sock.nil?
       # process eventDefaults - we are expecting a hash here. These will
-      # override any values in the events passed to us. i know. brutal.
+      # override any values in the events passed to us
       unless eventDefaults.nil?
         eventDefaults.each do |k, v|
           event.send(format('%s=', k), v)
@@ -33,7 +33,7 @@ module CEF
 
     def socksetup
       @sock = UDPSocket.new
-      @sock.connect(@receiver, @port)
+      @sock.connect(@receiver, @receiverPort)
     end
   end
 end

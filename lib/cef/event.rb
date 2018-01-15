@@ -15,20 +15,18 @@ module CEF
     end
 
     def event_time=(event_time)
-      @event_time = Time.parse(event_time)
+      @event_time = event_time.is_a?(Integer) ? Time.at(event_time) : Time.parse(event_time)
     end
 
     # so we can CEF::Event.new(:foo=>"bar")
     def initialize(*params)
       @event_time         = Time.new
-      @deviceVendor       = 'breed.org'
-      @deviceProduct      = 'CEF'
-      @deviceVersion      = CEF::VERSION
-      @deviceEventClassId = '0:event'
+      @deviceVendor       = 'Acme'
+      @deviceProduct      = 'Linux'
+      @deviceVersion      = '16.04'
+      @deviceEventClassId = '1000000'
       @deviceSeverity     = CEF::SEVERITY_LOW
-      @name               = 'unnamed event'
-      # used to avoid requiring syslog.h on windoze
-      # syslog_pri= Syslog::LOG_LOCAL0 | Syslog::LOG_NOTICE
+      @name               = 'here be log messages'
       @syslog_pri         = 131
       @my_hostname        = Socket.gethostname
       @other_attrs = {}
@@ -38,9 +36,9 @@ module CEF
       self
     end
 
-    # returns a cef formatted string of the kind:
-    # CEF:Version|Device Vendor|Device Product|Device Version|Signature ID (deviceEventClassId)|Name|Severity|Extension
     def to_s
+      # returns a cef formatted string of the kind:
+      # CEF:Version|Device Vendor|Device Product|Device Version|Signature ID (deviceEventClassId)|Name|Severity|Extension
       log_time = @event_time.strftime(CEF::LOG_TIME_FORMAT)
 
       format(
@@ -58,8 +56,17 @@ module CEF
       @additional[k] = v
     end
 
+    # used for non-schema fields
     def get_additional(k, _v)
       @additional[k]
+    end
+
+    def method_missing(m, *args, &block)
+      puts "There's no method called #{m}."
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      method_name.to_s.start_with?('device') || super
     end
 
     # escape only pipes and backslashes in the prefix. you bet your sweet

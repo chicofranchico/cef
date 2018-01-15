@@ -114,7 +114,7 @@ module CEF
 
     generatorID: 'generatorID',
 
-    message: 'msg',
+    msg: 'msg',
 
     oldfileHash: 'oldfileHash',
     oldfileId: 'oldfileId',

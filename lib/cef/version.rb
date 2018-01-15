@@ -1,3 +1,3 @@
 module CEF
-  VERSION = '1.0.0'.freeze
+  VERSION = '0.8.2'.freeze
 end
