@@ -15,6 +15,7 @@ opts = GetoptLong.new(
   ['--append-file',   GetoptLong::OPTIONAL_ARGUMENT],
   ['--tcp',           GetoptLong::OPTIONAL_ARGUMENT],
   ['--event_time',    GetoptLong::OPTIONAL_ARGUMENT],
+  ['--host',          GetoptLong::OPTIONAL_ARGUMENT],
   *cef_event.attrs.keys.collect { |o| ["--#{o}", GetoptLong::OPTIONAL_ARGUMENT] }
 )
 

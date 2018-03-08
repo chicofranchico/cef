@@ -1,8 +1,9 @@
 require 'time'
+require 'logger'
 
 module CEF
   class Event
-    attr_accessor :syslog_pri, :my_hostname
+    attr_accessor :syslog_pri, :host
     # set up accessors for all of the CEF event attributes. ruby meta magic.
     CEF::ATTRIBUTES.each do |k, _v|
       instance_eval do
@@ -28,7 +29,7 @@ module CEF
       @deviceSeverity     = CEF::SEVERITY_LOW
       @name               = 'here be log messages'
       @syslog_pri         = 131
-      @my_hostname        = Socket.gethostname
+      @host               = Socket.gethostname
       @other_attrs = {}
       @additional = {}
       Hash[*params].each { |k, v| send(format('%s=', k), v) }
@@ -45,7 +46,7 @@ module CEF
         CEF::LOG_FORMAT,
         syslog_pri.to_s,
         log_time,
-        my_hostname,
+        host,
         format_prefix,
         format_extension
       )
