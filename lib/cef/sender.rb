@@ -25,7 +25,9 @@ module CEF
       # override any values in the events passed to us
       unless eventDefaults.nil?
         eventDefaults.each do |k, v|
-          event.send(format('%s=', k), v)
+          unless v.nil?
+            event.send(format('%s=', k), v)
+          end
         end
       end
       sock.send event.to_s, 0
