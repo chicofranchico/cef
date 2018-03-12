@@ -62,9 +62,7 @@ module CEF
       @additional[k]
     end
 
-    def method_missing(m, *args, &block)
-      puts "There's no method called #{m}."
-    end
+    def method_missing(m, *args, &block) end
 
     def respond_to_missing?(method_name, include_private = false)
       method_name.to_s.start_with?('device') || super
